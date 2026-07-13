@@ -13,11 +13,13 @@
     "@aws-sdk/client-sts": "^3.850.0",
     "@aws-sdk/credential-provider-ini": "^3.850.0",
     "@better-logger/common": "workspace:*",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "catalog:",
+    "@types/ws": "^8.18.1",
     "tsx": "^4.20.0",
     "typescript": "catalog:",
     "vitest": "^4.0.4"

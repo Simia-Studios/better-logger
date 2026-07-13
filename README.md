@@ -20,6 +20,7 @@ The AWS principal needs these permissions:
 - `logs:StartQuery`
 - `logs:GetQueryResults`
 - `logs:StopQuery`
+- `logs:StartLiveTail`
 - `logs:DescribeQueryDefinitions`
 - `logs:PutQueryDefinition`
 - `logs:DeleteQueryDefinition`
@@ -37,6 +38,10 @@ pnpm check
 - `packages/common`: shared request/result contracts.
 
 The API uses the default AWS credential provider chain and `AWS_REGION` (defaulting to `us-east-1`). Saved queries are native CloudWatch Logs query definitions, so they remain visible in the AWS console and to other tools.
+
+## Live streaming
+
+Select one to ten Standard-class log groups and choose **Live tail** to open a real CloudWatch Logs `StartLiveTail` event stream. The API relays AWS event batches over an uncompressed WebSocket at `/api/live-tail`; closing the browser stream aborts the AWS session. The browser retains the newest 20,000 events and keeps following the tail until you scroll upward. Live Tail is billed by AWS per session-minute and CloudWatch samples the stream when more than 500 matching events arrive in one second.
 
 ## Connection persistence
 

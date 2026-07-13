@@ -16,10 +16,30 @@ export type ConnectionInfo = ConnectionSettings & {
 
 export type LogGroup = {
   arn: string;
+  class: "STANDARD" | "INFREQUENT_ACCESS" | "DELIVERY";
   name: string;
   storedBytes: number;
   retentionDays?: number;
 };
+
+export type LiveTailRequest = {
+  filterPattern?: string;
+  logGroupIdentifiers: string[];
+};
+
+export type LiveTailEvent = {
+  ingestionTime: number;
+  logGroup: string;
+  logStream: string;
+  message: string;
+  timestamp: number;
+};
+
+export type LiveTailMessage =
+  | { type: "started"; sessionId: string }
+  | { type: "events"; events: LiveTailEvent[]; sampled: boolean }
+  | { type: "error"; message: string }
+  | { type: "stopped" };
 
 export type SavedQuery = {
   id: string;

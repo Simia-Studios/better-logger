@@ -388,6 +388,17 @@ kbd {
   color: var(--muted);
   font-size: 10px;
 }
+.live-filter {
+  width: min(240px, 24vw);
+  height: 25px;
+  padding: 0 8px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  background: #0a0a0a;
+  font-size: 11px;
+  outline: none;
+}
 .text-button {
   color: var(--muted);
   padding: 0 7px;
@@ -404,6 +415,9 @@ kbd {
 .run-button.stop {
   background: #999999;
   color: #111111;
+}
+.run-button.live-button {
+  background: #d0d0d0;
 }
 .editor {
   min-height: 0;
@@ -433,6 +447,9 @@ kbd {
 .status-dot.complete {
   background: #bbbbbb;
 }
+.status-dot.live {
+  background: #f0f0f0;
+}
 .status-dot.running,
 .status-dot.scheduled {
   background: #f0f0f0;
@@ -445,6 +462,22 @@ kbd {
   border-left: 1px solid var(--line);
   padding-left: 8px;
   font-variant-numeric: tabular-nums;
+}
+.metric.sampled {
+  color: #d0d0d0;
+  letter-spacing: 0.04em;
+}
+.follow-button {
+  margin-left: auto;
+  height: 24px;
+  border: 0;
+  background: transparent;
+  color: #d0d0d0;
+  font: inherit;
+  cursor: pointer;
+}
+.follow-button:disabled {
+  color: var(--faint);
 }
 .result-scroll {
   min-height: 0;
@@ -727,6 +760,9 @@ kbd {
   }
   .saved-row {
     min-height: 48px;
+  }
+  .live-filter {
+    font-size: 16px;
   }
 }
 

@@ -21,7 +21,9 @@ const LogGroupRow: FC<{ group: LogGroup; selected: boolean; onToggle: (name: str
       <label className={`group-row${selected ? " selected" : ""}`} title={group.name}>
         <input type="checkbox" checked={selected} onChange={() => onToggle(group.name)} />
         <span className="group-name">{group.name}</span>
-        <span className="group-size">{formatBytes(group.storedBytes)}</span>
+        <span className="group-size">
+          {group.class === "STANDARD" ? formatBytes(group.storedBytes) : group.class.slice(0, 2)}
+        </span>
       </label>
     );
   });

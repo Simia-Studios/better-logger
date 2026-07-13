@@ -1,5 +1,6 @@
 import type { ConnectionSettings, QueryRequest, SavedQuery } from "@better-logger/common";
 import express, { type NextFunction, type Request, type Response } from "express";
+import { createServer } from "node:http";
 import {
   deleteQuery,
   getQuery,
@@ -12,9 +13,12 @@ import {
   stopQuery,
 } from "./cloudwatch.js";
 import { connect, getConnection } from "./connection.js";
+import { attachLiveTail } from "./liveTail.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 3100);
+const server = createServer(app);
+attachLiveTail(server);
 
 app.use(express.json({ limit: "32kb" }));
 
@@ -99,6 +103,6 @@ app.use((error: unknown, _request: Request, response: Response, _next: NextFunct
   response.status(500).json({ message });
 });
 
-app.listen(port, () => {
+server.listen(port, () => {
   process.stdout.write(`better-logger API listening on http://localhost:${port}\n`);
 });

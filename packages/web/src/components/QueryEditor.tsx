@@ -1,6 +1,6 @@
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { Play, Save, Square } from "lucide-react";
+import { Play, Radio, Save, Square } from "lucide-react";
 import { memo, useEffect, useRef, type FC } from "react";
 import type { QueryLanguage } from "@better-logger/common";
 import { queryExtensions } from "../queryLanguage";
@@ -10,9 +10,15 @@ type Props = {
   language: QueryLanguage;
   running: boolean;
   canRun: boolean;
+  canLive: boolean;
   fields: string[];
+  live: boolean;
+  liveFilter: string;
   onQueryChange: (query: string) => void;
   onLanguageChange: (language: QueryLanguage) => void;
+  onLiveFilterChange: (filter: string) => void;
+  onLiveStart: () => void;
+  onLiveStop: () => void;
   onRun: () => void;
   onStop: () => void;
   onSave: () => void;
@@ -24,9 +30,15 @@ export const QueryEditor: FC<Props> = memo((props) => {
     language,
     running,
     canRun,
+    canLive,
     fields,
+    live,
+    liveFilter,
     onQueryChange,
     onLanguageChange,
+    onLiveFilterChange,
+    onLiveStart,
+    onLiveStop,
     onRun,
     onStop,
     onSave,
@@ -85,6 +97,15 @@ export const QueryEditor: FC<Props> = memo((props) => {
           <option value="PPL">PPL</option>
           <option value="SQL">SQL</option>
         </select>
+        <input
+          className="live-filter"
+          aria-label="Live Tail filter pattern"
+          value={liveFilter}
+          onChange={(event) => onLiveFilterChange(event.target.value)}
+          placeholder="Live filter pattern…"
+          spellCheck={false}
+          maxLength={2000}
+        />
         <span className="toolbar-spacer" />
         <button
           className="text-button"
@@ -107,6 +128,21 @@ export const QueryEditor: FC<Props> = memo((props) => {
             title="Run (Ctrl/⌘ + Enter)"
           >
             <Play size={12} fill="currentColor" /> Run <kbd>⌘↵</kbd>
+          </button>
+        )}
+        {live ? (
+          <button className="run-button stop" type="button" onClick={onLiveStop}>
+            <Square size={12} fill="currentColor" /> End live
+          </button>
+        ) : (
+          <button
+            className="run-button live-button"
+            type="button"
+            disabled={!canLive}
+            onClick={onLiveStart}
+            title="Stream 1–10 selected Standard log groups with CloudWatch Live Tail"
+          >
+            <Radio size={13} /> Live tail
           </button>
         )}
       </div>

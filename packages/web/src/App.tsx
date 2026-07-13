@@ -10,6 +10,7 @@ import { ResultsGrid } from "./components/ResultsGrid";
 import { SaveDialog } from "./components/SaveDialog";
 import { SavedQueries } from "./components/SavedQueries";
 import { useAwsConnection } from "./hooks/useAwsConnection";
+import { useLiveTail } from "./hooks/useLiveTail";
 
 const defaultQuery = `fields @timestamp, level, @message, @logStream
 | sort @timestamp desc
@@ -28,10 +29,23 @@ export const App: FC = () => {
   const [range, setRange] = useState(3600);
   const [queryId, setQueryId] = useState<string>();
   const [saveOpen, setSaveOpen] = useState(false);
+  const [liveFilter, setLiveFilter] = useState("");
+  const [view, setView] = useState<"query" | "live">("query");
+  const {
+    error: liveError,
+    received: liveReceived,
+    rows: liveRows,
+    sampled: liveSampled,
+    session: liveSession,
+    start: startLiveTail,
+    status: liveStatus,
+    stop: stopLiveTail,
+  } = useLiveTail();
   const resetWorkspace = useCallback(() => {
+    stopLiveTail();
     setSelected(new Set());
     setQueryId(undefined);
-  }, []);
+  }, [stopLiveTail]);
   const aws = useAwsConnection(resetWorkspace);
   const groupsQuery = useInfiniteQuery({
     queryKey: ["log-groups"],
@@ -50,6 +64,15 @@ export const App: FC = () => {
     () => groupsQuery.data?.pages.flatMap((page) => page.groups) ?? [],
     [groupsQuery.data],
   );
+  const selectedGroups = useMemo(
+    () => groups.filter((group) => selected.has(group.name)),
+    [groups, selected],
+  );
+  const selectedIdentifiers = useMemo(
+    () => selectedGroups.map((group) => group.arn),
+    [selectedGroups],
+  );
+  const liveEligible = selectedGroups.every((group) => group.class === "STANDARD");
   const fieldGroup = selected.values().next().value;
   const fieldsQuery = useQuery({
     queryKey: ["fields", fieldGroup],
@@ -93,6 +116,10 @@ export const App: FC = () => {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["saved-queries"] }),
   });
 
+  const result = resultQuery.data;
+  const running = runPending || result?.status === "Running" || result?.status === "Scheduled";
+  const live = liveStatus === "Connecting" || liveStatus === "Live";
+
   const toggleGroup = useCallback((name: string) => {
     setSelected((current) => {
       const next = new Set(current);
@@ -103,6 +130,8 @@ export const App: FC = () => {
   }, []);
 
   const run = useCallback(() => {
+    if (live) stopLiveTail();
+    setView("query");
     const endTime = Math.floor(Date.now() / 1000);
     runQuery({
       query,
@@ -112,7 +141,16 @@ export const App: FC = () => {
       endTime,
       limit: 10_000,
     });
-  }, [language, query, range, runQuery, selected]);
+  }, [language, live, query, range, runQuery, selected, stopLiveTail]);
+
+  const startLive = useCallback(() => {
+    if (running && queryId) stopQuery(queryId);
+    setView("live");
+    startLiveTail({
+      logGroupIdentifiers: selectedIdentifiers,
+      filterPattern: liveFilter.trim() || undefined,
+    });
+  }, [liveFilter, queryId, running, selectedIdentifiers, startLiveTail, stopQuery]);
 
   const stop = useCallback(() => {
     if (queryId) stopQuery(queryId);
@@ -135,9 +173,8 @@ export const App: FC = () => {
   const removeSaved = useCallback((id: string) => deleteQuery(id), [deleteQuery]);
   const changeRange = useCallback((nextRange: number) => setRange(nextRange), []);
 
-  const result = resultQuery.data;
-  const running = runPending || result?.status === "Running" || result?.status === "Scheduled";
-  const error = runError?.message ?? resultQuery.error?.message ?? groupsQuery.error?.message;
+  const queryError = runError?.message ?? resultQuery.error?.message ?? groupsQuery.error?.message;
+  const liveView = view === "live";
 
   return (
     <main className="app-shell">
@@ -171,18 +208,31 @@ export const App: FC = () => {
             language={language}
             running={running}
             canRun={Boolean(query.trim() && selected.size)}
+            canLive={
+              selectedIdentifiers.length > 0 &&
+              selectedIdentifiers.length <= 10 &&
+              liveEligible &&
+              !running
+            }
             fields={discoveredFields}
+            live={live}
+            liveFilter={liveFilter}
             onQueryChange={setQuery}
             onLanguageChange={setLanguage}
+            onLiveFilterChange={setLiveFilter}
+            onLiveStart={startLive}
+            onLiveStop={stopLiveTail}
             onRun={run}
             onStop={stop}
             onSave={openSave}
           />
           <ResultsGrid
-            rows={result?.rows ?? emptyRows}
-            status={result?.status ?? (runPending ? "Scheduled" : "Idle")}
-            progress={result?.progress ?? emptyProgress}
-            error={error}
+            key={liveView ? `live:${liveSession}` : "query"}
+            rows={liveView ? liveRows : (result?.rows ?? emptyRows)}
+            status={liveView ? liveStatus : (result?.status ?? (runPending ? "Scheduled" : "Idle"))}
+            progress={liveView ? emptyProgress : (result?.progress ?? emptyProgress)}
+            error={liveView ? liveError : queryError}
+            live={liveView ? { received: liveReceived, sampled: liveSampled } : undefined}
           />
         </div>
       </div>

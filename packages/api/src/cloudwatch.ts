@@ -39,10 +39,11 @@ export const listLogGroups = async (nextToken?: string) => {
     new DescribeLogGroupsCommand({ limit: 50, nextToken }),
   );
   const groups: LogGroup[] = (output.logGroups ?? []).flatMap((group) =>
-    group.logGroupName && group.arn
+    group.logGroupName && (group.logGroupArn || group.arn)
       ? [
           {
-            arn: group.arn,
+            arn: group.logGroupArn ?? group.arn?.replace(/:\*$/, "") ?? "",
+            class: group.logGroupClass ?? "STANDARD",
             name: group.logGroupName,
             storedBytes: group.storedBytes ?? 0,
             retentionDays: group.retentionInDays,
