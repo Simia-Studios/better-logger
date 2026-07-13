@@ -1,0 +1,12 @@
+{
+  "plugins": ["typescript", "react", "react-perf", "unicorn", "import"],
+  "categories": { "correctness": "error", "perf": "warn" },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react-perf/jsx-no-new-function-as-prop": "off",
+    "react-perf/jsx-no-new-object-as-prop": "off",
+    "typescript/no-explicit-any": "error",
+    "unicorn/prefer-node-protocol": "error"
+  },
+  "ignorePatterns": ["dist/**"]
+}

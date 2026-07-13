@@ -1,0 +1,22 @@
+{
+  "name": "better-logger",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "oxlint -c .oxlintrc.json --type-aware",
+    "format": "oxfmt .",
+    "check": "oxfmt --check . && pnpm lint && turbo run build test typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "oxfmt": "^0.56.0",
+    "oxlint": "^1.71.0",
+    "oxlint-tsgolint": "^0.24.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.9.0"
+  },
+  "packageManager": "pnpm@10.12.1"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@better-logger/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run src --passWithNoTests",
+    "dev": "tsx watch src/server.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.850.0",
+    "@aws-sdk/client-sts": "^3.850.0",
+    "@aws-sdk/credential-provider-ini": "^3.850.0",
+    "@better-logger/common": "workspace:*",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "catalog:",
+    "tsx": "^4.20.0",
+    "typescript": "catalog:",
+    "vitest": "^4.0.4"
+  }
+}
